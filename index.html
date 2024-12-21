@@ -1,1 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo da Forca - Arcadismo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      background-image: url('https://pedagogiaaopedaletra.com/wp-content/uploads/2018/12/arcadismo.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: scroll;
+    }
+
+    h1 {
+      font-size: 6vw;
+      color: #fff;
+      margin: 20px 0;
+      text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.7);
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .game {
+      margin: 30px auto;
+      padding: 20px;
+      border: 2px solid #333;
+      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.8);
+      width: 100%;
+      max-width: 90%;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .word {
+      font-size: 24px;
+      letter-spacing: 5px;
+      margin-bottom: 20px;
+    }
+
+    .letters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .letter {
+      flex: 0 0 12%;
+      max-width: 40px;
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+      margin: 5px;
+      border: 1px solid #333;
+      cursor: pointer;
+      text-transform: uppercase;
+      background-color: #f0f0f0;
+      border-radius: 5px;
+      transition: background-color 0.2s ease;
+    }
+
+    .letter:hover {
+      background-color: #ddd;
+    }
+
+    .letter.disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .hint {
+      font-size: 16px;
+      margin-top: 10px;
+      color: #666;
+    }
+
+    .result {
+      font-size: 18px;
+      margin-top: 15px;
+      color: green;
+    }
+
+    .hangman {
+      font-size: 18px;
+      color: red;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 8vw;
+      }
+
+      .game {
+        max-width: 100%;
+        padding: 15px;
+      }
+
+      .letters {
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .letter {
+        flex: 0 0 25%;
+        font-size: 1.2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Jogo da Forca - Arcadismo</h1>
+
+  <div class="container">
+    <div class="game">
+      <div class="hint">Dica: Instrumento que simboliza a poesia bucólica.</div>
+      <div class="word" id="word1">_ _ _ _</div>
+      <div class="hangman" id="hangman1">Erros: 0 de 5</div>
+      <div class="letters" id="letters1"></div>
+      <div class="result" id="result1"></div>
+    </div>
+
+    <div class="game">
+      <div class="hint">Dica: Elemento central do movimento Arcadista.</div>
+      <div class="word" id="word2">_ _ _ _ _ _ _ _</div>
+      <div class="hangman" id="hangman2">Erros: 0 de 5</div>
+      <div class="letters" id="letters2"></div>
+      <div class="result" id="result2"></div>
+    </div>
+
+    <div class="game">
+      <div class="hint">Dica: Idealização da vida no campo.</div>
+      <div class="word" id="word3">_ _ _ _ _ _ _ _</div>
+      <div class="hangman" id="hangman3">Erros: 0 de 5</div>
+      <div class="letters" id="letters3"></div>
+      <div class="result" id="result3"></div>
+    </div>
+
+    <div class="game">
+      <div class="hint">Dica: Expressão latina que significa 'fugir da cidade'.</div>
+      <div class="word" id="word4">_ _ _ _ _ _ _ _ _ _</div>
+      <div class="hangman" id="hangman4">Erros: 0 de 5</div>
+      <div class="letters" id="letters4"></div>
+      <div class="result" id="result4"></div>
+    </div>
+
+    <div class="game">
+      <div class="hint">Dica: Forma literária típica do Arcadismo.</div>
+      <div class="word" id="word5">_ _ _ _ _ _ _</div>
+      <div class="hangman" id="hangman5">Erros: 0 de 5</div>
+      <div class="letters" id="letters5"></div>
+      <div class="result" id="result5"></div>
+    </div>
+  </div>
+
+  <script>
+    const games = [
+      { id: 1, word: "LIRA", hint: "Instrumento que simboliza a poesia bucólica." },
+      { id: 2, word: "NATUREZA", hint: "Elemento central do movimento Arcadista." },
+      { id: 3, word: "BUCOLISMO", hint: "Idealização da vida no campo." },
+      { id: 4, word: "FUGERE URBEM", hint: "Expressão latina que significa 'fugir da cidade'." },
+      { id: 5, word: "PASTORAL", hint: "Forma literária típica do Arcadismo." }
+    ];
+
+    function initGame(game) {
+      const wordElement = document.getElementById(`word${game.id}`);
+      const lettersElement = document.getElementById(`letters${game.id}`);
+      const hangmanElement = document.getElementById(`hangman${game.id}`);
+      const resultElement = document.getElementById(`result${game.id}`);
+
+      let guessedLetters = [];
+      let mistakes = 0;
+      const maxMistakes = 5;
+
+      function updateWordDisplay() {
+        let display = game.word
+          .split("")
+          .map(letter => (guessedLetters.includes(letter) ? letter : letter === " " ? " " : "_"))
+          .join(" ");
+        wordElement.textContent = display;
+
+        if (!display.includes("_")) {
+          resultElement.textContent = "Você venceu!";
+          disableAllButtons();
+        }
+      }
+
+      function generateLetterButtons() {
+        lettersElement.innerHTML = "";
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        alphabet.split("").forEach(letter => {
+          const button = document.createElement("div");
+          button.textContent = letter;
+          button.classList.add("letter");
+          button.addEventListener("click", () => guessLetter(letter));
+          lettersElement.appendChild(button);
+        });
+      }
+
+      function guessLetter(letter) {
+        if (guessedLetters.includes(letter) || mistakes >= maxMistakes) {
+          return;
+        }
+
+        guessedLetters.push(letter);
+        const letterButtons = lettersElement.querySelectorAll(".letter");
+        letterButtons.forEach(button => {
+          if (button.textContent === letter) {
+            button.classList.add("disabled");
+          }
+        });
+
+        if (game.word.includes(letter)) {
+          updateWordDisplay();
+        } else {
+          mistakes++;
+          hangmanElement.textContent = `Erros: ${mistakes} de ${maxMistakes}`;
+          if (mistakes >= maxMistakes) {
+            resultElement.textContent = `Você perdeu! A palavra era: ${game.word}.`;
+            disableAllButtons();
+          }
+        }
+      }
+
+      function disableAllButtons() {
+        const letterButtons = lettersElement.querySelectorAll(".letter");
+        letterButtons.forEach(button => button.classList.add("disabled"));
+      }
+
+      updateWordDisplay();
+      generateLetterButtons();
+    }
+
+    games.forEach(initGame);
+  </script>
+</body>
+</html>
 
